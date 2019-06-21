@@ -3,6 +3,9 @@ import UIKit
 class ViewController: UIViewController {
     
     @IBOutlet weak var slideShow : UIImageView!
+    @IBOutlet weak var btnBack: UIButton!
+    @IBOutlet weak var btnNext: UIButton!
+    
     var imageIndex = 0
     var timer : Timer!
     let images = [UIImage(named: "1"), UIImage(named: "2"), UIImage(named: "3")]
@@ -10,7 +13,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // 受け取った画像をImageViewに設定する
         slideShow.image = images[0]
     }
     
@@ -28,7 +30,6 @@ class ViewController: UIViewController {
     }
     
     // next button
-    //引数がsenderだ！！next imageというアクションが起きたany型のUIbuttumがsenderに入る
     @IBAction func nextImage(_ sender: Any){
         if self.timer == nil {
             if imageIndex == 2 {
@@ -42,16 +43,23 @@ class ViewController: UIViewController {
     }
     
     // play & stop button
+    @IBOutlet weak var btnPlayPause: UIButton!
     @IBAction func playImage(_ sender: Any){
         if self.timer == nil {
             self.timer = Timer.scheduledTimer(timeInterval: 2, target: self, selector: #selector(onTimer(_:)), userInfo: nil, repeats: true)
-            //ここ解説https://pg-happy.jp/swift-scheduledtimer.html
+            btnPlayPause.setTitle("停止", for: UIControl.State.normal)
+            btnNext.isEnabled = false
+            btnBack.isEnabled = false
         }
         else {
             self.timer.invalidate()   // タイマーを停止する
             self.timer = nil          // startTimer() の timer == nil で判断するために、 timer = nil としておく
+            btnPlayPause.setTitle("再生", for: UIControl.State.normal)
+            btnNext.isEnabled = true
+            btnBack.isEnabled = true
         }
     }
+
     
     @objc func onTimer(_ timer : Timer) {
         if imageIndex == 2 {
@@ -64,19 +72,24 @@ class ViewController: UIViewController {
     }
     
     // DetailViewControllerのimageにslideShowを渡す
-    
-    // ①セグエ実行前処理
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "detail" {
         let detailViewController:DetailViewController = segue.destination as! DetailViewController
         detailViewController.image = slideShow.image
-    }
     }
     
     // go to next view
     @IBAction func tapAction(_ sender: Any) {
         // セグエを使用して画面を遷移
         performSegue(withIdentifier: "detail", sender: nil)
+       
+        if self.timer != nil {
+            self.timer.invalidate()
+            self.timer = nil
+        }
+       
+        btnPlayPause.setTitle("再生", for: UIControl.State.normal)
+        btnNext.isEnabled = true
+        btnBack.isEnabled = true
     }
     
     // back to top view
